@@ -107,6 +107,7 @@
 
       const createdBy = prompt("Nom de l'admin qui écrit :") || "Admin";
       const key = prompt("Clé admin :");
+
       if (key !== ADMIN_KEY) {
         alert("Clé admin incorrecte.");
         return;
@@ -118,8 +119,10 @@
           title,
           content,
           createdBy,
+          adminKey: ADMIN_KEY,
           createdAt: serverTimestamp()
         });
+
         alert("Rapport enregistré.");
         editor.innerHTML = "";
       } catch (e) {
