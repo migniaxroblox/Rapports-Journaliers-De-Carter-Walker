@@ -57,26 +57,18 @@ body {
   text-decoration: underline;
 }
 
-.selectors {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.select-group {
-  flex: 1;
-  min-width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 label {
   font-size: 0.9rem;
   color: #9ca3af;
+  display: block;
+  margin-bottom: 6px;
 }
 
-select, input[type="text"], input[type="password"] {
+input[type="date"],
+input[type="text"],
+input[type="password"],
+textarea {
+  width: 100%;
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.5);
@@ -84,19 +76,14 @@ select, input[type="text"], input[type="password"] {
   color: #e5e7eb;
   outline: none;
   backdrop-filter: blur(10px);
+  margin-bottom: 10px;
 }
 
-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-select:focus, input:focus {
+input:focus,
+textarea:focus {
   border-color: #38bdf8;
   box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
 }
-
-/* Glass card */
 
 .glass-card {
   background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent),
@@ -111,37 +98,14 @@ select:focus, input:focus {
   padding: 18px;
 }
 
-.report-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.report-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
-  padding-bottom: 10px;
-}
-
-.report-header h2 {
-  font-size: 1.1rem;
-}
-
-.report-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .btn {
   border: none;
   border-radius: 999px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   font-size: 0.9rem;
   cursor: pointer;
   transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+  display: inline-block;
 }
 
 .btn.primary {
@@ -156,12 +120,6 @@ select:focus, input:focus {
   border: 1px solid rgba(148, 163, 184, 0.6);
 }
 
-.btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
 .btn:not(:disabled):hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(56, 189, 248, 0.5);
@@ -172,34 +130,32 @@ select:focus, input:focus {
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.9);
 }
 
-.no-report {
-  font-size: 0.95rem;
-  color: #9ca3af;
-  padding: 8px 2px;
-}
-
-.report-viewer {
-  padding: 10px 4px;
-  max-height: 420px;
-  overflow-y: auto;
-  line-height: 1.5;
-}
-
-/* Editor */
-
-.editor-container {
-  margin-top: 8px;
-  border-top: 1px dashed rgba(148, 163, 184, 0.5);
-  padding-top: 10px;
+.report-card {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.7);
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.report-title {
+  font-size: 1rem;
+}
+
+.small {
+  font-size: 0.85rem;
+  color: #9ca3af;
 }
 
 .editor-toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-bottom: 8px;
 }
 
 .editor-toolbar button {
@@ -217,8 +173,8 @@ select:focus, input:focus {
 }
 
 .editor-area {
-  min-height: 180px;
-  max-height: 420px;
+  min-height: 220px;
+  max-height: 500px;
   overflow-y: auto;
   padding: 10px;
   border-radius: 10px;
@@ -231,14 +187,6 @@ select:focus, input:focus {
   border-color: #38bdf8;
   box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
 }
-
-.editor-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-/* Modal + overlay */
 
 .modal {
   position: fixed;
@@ -254,20 +202,6 @@ select:focus, input:focus {
   max-width: 420px;
 }
 
-.modal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 10px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 14px;
-}
-
 .overlay {
   position: fixed;
   inset: 0;
@@ -275,8 +209,6 @@ select:focus, input:focus {
   backdrop-filter: blur(4px);
   z-index: 10;
 }
-
-/* Utils */
 
 .hidden {
   display: none !important;
@@ -286,18 +218,4 @@ select:focus, input:focus {
   color: #f97373;
   font-size: 0.85rem;
   margin-top: 6px;
-}
-
-/* Responsive */
-
-@media (max-width: 700px) {
-  .report-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .report-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
 }
