@@ -1,65 +1,70 @@
-<script type="module">
-import { firebaseConfig } from "./firebase-config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Rapports du jour</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="glass-card">
+      <h1>Rapports du jour</h1>
+      <p id="dayLabel"></p>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+      <div id="reportsList"></div>
+      <p id="emptyMsg" class="small"></p>
 
-const params = new URLSearchParams(window.location.search);
-const day = params.get("day");
+      <button class="btn secondary" onclick="location.href='index.html'">Changer de jour</button>
+      <button class="btn primary" onclick="location.href='admin.html'">Panel admin</button>
+    </div>
+  </div>
 
-const dayLabel = document.getElementById("dayLabel");
-const reportsList = document.getElementById("reportsList");
-const emptyMsg = document.getElementById("emptyMsg");
+  <script type="module">
+    import { firebaseConfig } from "./firebase-config.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, query, where, getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-dayLabel.textContent = "Jour : " + day;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-async function loadReports() {
-  const q = query(
-    collection(db, "reports"),
-    where("day", "==", day)
-  );
+    const params = new URLSearchParams(location.search);
+    const day = params.get("day");
 
-  const snap = await getDocs(q);
+    document.getElementById("dayLabel").textContent = "Jour : " + day;
 
-  if (snap.empty) {
-    emptyMsg.textContent = "Aucun rapport pour ce jour.";
-    return;
-  }
+    async function load() {
+      const q = query(collection(db, "reports"), where("day", "==", day));
+      const snap = await getDocs(q);
 
-  emptyMsg.textContent = "";
+      if (snap.empty) {
+        document.getElementById("emptyMsg").textContent = "Aucun rapport.";
+        return;
+      }
 
-  // Trier manuellement par createdAt
-  const docs = [];
-  snap.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+      const docs = [];
+      snap.forEach(d => docs.push({ id: d.id, ...d.data() }));
 
-  docs.sort((a, b) => {
-    if (!a.createdAt || !b.createdAt) return 0;
-    return b.createdAt.seconds - a.createdAt.seconds;
-  });
+      docs.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
 
-  docs.forEach(data => {
-    const div = document.createElement("div");
-    div.className = "report-card";
+      const list = document.getElementById("reportsList");
 
-    div.innerHTML = `
-      <div>
-        <div class="report-title">${data.title}</div>
-        <div class="small">Par ${data.createdBy}</div>
-      </div>
-      <button class="btn primary" onclick="window.location.href='lecture.html?id=${data.id}'">Lire</button>
-    `;
+      docs.forEach(r => {
+        const div = document.createElement("div");
+        div.className = "report-card";
+        div.innerHTML = `
+          <div>
+            <div>${r.title}</div>
+            <div class="small">Par ${r.createdBy}</div>
+          </div>
+          <button class="btn primary" onclick="location.href='lecture.html?id=${r.id}'">Lire</button>
+        `;
+        list.appendChild(div);
+      });
+    }
 
-    reportsList.appendChild(div);
-  });
-}
-
-loadReports();
-</script>
+    load();
+  </script>
+</body>
+</html>
