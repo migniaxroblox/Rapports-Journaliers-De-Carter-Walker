@@ -1,4 +1,3 @@
-// firebase-config.js
 export const firebaseConfig = {
   apiKey: "AIzaSyAWNP7hTZAJD9dAvG1MB5SLeSoKBRUgvd8",
   authDomain: "scp-ait-rapport.firebaseapp.com",
