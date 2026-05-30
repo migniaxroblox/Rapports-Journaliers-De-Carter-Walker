@@ -2,28 +2,36 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Choisir un jour - Rapports AIT</title>
+  <title>Rapports AIT - Choisir un jour</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="app-container">
+    <div class="glass-card" style="max-width:500px;margin:60px auto;">
+      <h1>Rapports AIT</h1>
+      <p class="small" style="margin-top:4px;">Serveur SCP RP — GitHub + Firebase</p>
 
-<div class="app-container glass-card" style="max-width:500px;margin-top:60px;">
-  <h1>Rapports AIT</h1>
-  <p>Choisis un jour pour voir les rapports.</p>
+      <div style="margin-top:16px;">
+        <label for="dayInput">Jour :</label>
+        <input type="date" id="dayInput">
+      </div>
 
-  <label for="dayInput">Jour :</label>
-  <input type="date" id="dayInput">
+      <button class="btn primary" id="goButton" style="margin-top:10px;">Voir les rapports</button>
+    </div>
+  </div>
 
-  <button class="btn primary" id="goButton">Voir les rapports</button>
-</div>
+  <script>
+    const goButton = document.getElementById("goButton");
+    const dayInput = document.getElementById("dayInput");
 
-<script>
-document.getElementById("goButton").onclick = () => {
-  const day = document.getElementById("dayInput").value;
-  if (!day) return alert("Choisis un jour !");
-  window.location.href = "rapports.html?day=" + day;
-};
-</script>
-
+    goButton.addEventListener("click", () => {
+      const day = dayInput.value;
+      if (!day) {
+        alert("Choisis un jour.");
+        return;
+      }
+      window.location.href = "rapports.html?day=" + encodeURIComponent(day);
+    });
+  </script>
 </body>
 </html>
