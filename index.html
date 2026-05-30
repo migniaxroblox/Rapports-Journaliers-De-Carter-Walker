@@ -2,96 +2,28 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Rapports AIT - SCP RP</title>
+  <title>Choisir un jour - Rapports AIT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-    <header class="app-header">
-      <h1>Rapports AIT - Journalier</h1>
-      <p>Serveur SCP RP — GitHub + Firebase</p>
-    </header>
 
-    <main class="app-main">
-      <section class="selectors">
-        <div class="select-group">
-          <label for="weekSelect">Semaine :</label>
-          <select id="weekSelect"></select>
-        </div>
+<div class="app-container glass-card" style="max-width:500px;margin-top:60px;">
+  <h1>Rapports AIT</h1>
+  <p>Choisis un jour pour voir les rapports.</p>
 
-        <div class="select-group">
-          <label for="daySelect">Jour :</label>
-          <select id="daySelect" disabled>
-            <option value="">Choisissez une semaine d'abord</option>
-          </select>
-        </div>
-      </section>
+  <label for="dayInput">Jour :</label>
+  <input type="date" id="dayInput">
 
-      <section class="report-section glass-card">
-        <div class="report-header">
-          <h2 id="reportTitle">Aucun jour sélectionné</h2>
-          <div class="report-actions">
-            <button id="backButton" class="btn secondary" disabled>Retour</button>
-            <button id="newReportButton" class="btn primary" disabled>Ajouter / Modifier le rapport</button>
-          </div>
-        </div>
+  <button class="btn primary" id="goButton">Voir les rapports</button>
+</div>
 
-        <div id="noReportMessage" class="no-report">
-          Sélectionnez une semaine et un jour pour afficher un rapport.
-        </div>
+<script>
+document.getElementById("goButton").onclick = () => {
+  const day = document.getElementById("dayInput").value;
+  if (!day) return alert("Choisis un jour !");
+  window.location.href = "rapports.html?day=" + day;
+};
+</script>
 
-        <div id="reportViewer" class="report-viewer hidden"></div>
-
-        <div id="editorContainer" class="editor-container hidden">
-          <div class="editor-toolbar">
-            <button data-cmd="bold"><b>B</b></button>
-            <button data-cmd="italic"><i>I</i></button>
-            <button data-cmd="underline"><u>U</u></button>
-            <button data-cmd="insertUnorderedList">• Liste</button>
-            <button data-cmd="insertOrderedList">1. Liste</button>
-            <button id="addImageButton">Image</button>
-          </div>
-          <div id="editor" contenteditable="true" class="editor-area"></div>
-          <div class="editor-actions">
-            <button id="cancelEditButton" class="btn secondary">Annuler</button>
-            <button id="saveReportButton" class="btn primary">Enregistrer</button>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="app-footer">
-      <a href="admin.html" class="admin-link">Panel admin (logs)</a>
-    </footer>
-  </div>
-
-  <!-- Popup identification -->
-  <div id="identModal" class="modal hidden">
-    <div class="modal-content glass-card">
-      <h2>Identification lecture</h2>
-      <p>Avant de lire les rapports, indique qui lit et, si besoin, la clé admin.</p>
-
-      <div class="modal-field">
-        <label for="readerName">Qui lit le rapport ?</label>
-        <input type="text" id="readerName" placeholder="Ex : Agent Dupont">
-      </div>
-
-      <div class="modal-field">
-        <label for="adminKey">Clé admin (optionnelle)</label>
-        <input type="password" id="adminKey" placeholder="Laisser vide si simple lecture">
-      </div>
-
-      <div class="modal-actions">
-        <button id="cancelIdentButton" class="btn secondary">Quitter</button>
-        <button id="confirmIdentButton" class="btn primary">Continuer</button>
-      </div>
-
-      <p id="identError" class="error-message hidden">Clé admin incorrecte.</p>
-    </div>
-  </div>
-
-  <div id="overlay" class="overlay hidden"></div>
-
-  <script type="module" src="app.js"></script>
 </body>
 </html>
