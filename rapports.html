@@ -6,57 +6,90 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>Rapports du jour</h1>
+      <p class="small" id="dayLabel"></p>
+    </header>
 
-<div class="app-container glass-card">
-  <h1>Rapports du jour</h1>
-  <p id="dayLabel"></p>
+    <main class="app-main">
+      <section class="glass-card">
+        <div id="reportsList"></div>
+        <p id="emptyMsg" class="small" style="margin-top:8px;"></p>
+        <div style="margin-top:16px;">
+          <a href="index.html" class="btn secondary">Changer de jour</a>
+          <a href="admin.html" class="btn primary" style="margin-left:8px;">Panel admin</a>
+        </div>
+      </section>
+    </main>
+  </div>
 
-  <div id="reportsList"></div>
+  <script type="module">
+    import { firebaseConfig } from "./firebase-config.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      orderBy,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  <a href="index.html" class="btn secondary" style="margin-top:20px;">Retour</a>
-</div>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-<script type="module">
-import { firebaseConfig } from "./firebase-config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    const params = new URLSearchParams(window.location.search);
+    const day = params.get("day");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    const dayLabel = document.getElementById("dayLabel");
+    const reportsList = document.getElementById("reportsList");
+    const emptyMsg = document.getElementById("emptyMsg");
 
-const params = new URLSearchParams(window.location.search);
-const day = params.get("day");
+    if (!day) {
+      dayLabel.textContent = "Aucun jour sélectionné.";
+    } else {
+      dayLabel.textContent = "Jour : " + day;
+    }
 
-document.getElementById("dayLabel").textContent = "Jour : " + day;
+    async function loadReports() {
+      if (!day) {
+        emptyMsg.textContent = "Retourne à l'accueil pour choisir un jour.";
+        return;
+      }
 
-async function loadReports() {
-  const q = query(collection(db, "reports"), where("day", "==", day));
-  const snap = await getDocs(q);
+      const q = query(
+        collection(db, "reports"),
+        where("day", "==", day),
+        orderBy("createdAt", "desc")
+      );
 
-  const list = document.getElementById("reportsList");
+      const snap = await getDocs(q);
 
-  if (snap.empty) {
-    list.innerHTML = "<p>Aucun rapport pour ce jour.</p>";
-    return;
-  }
+      if (snap.empty) {
+        emptyMsg.textContent = "Aucun rapport pour ce jour.";
+        return;
+      }
 
-  snap.forEach(doc => {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "glass-card";
-    div.style.marginTop = "10px";
+      emptyMsg.textContent = "";
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "report-card";
 
-    div.innerHTML = `
-      <h3>${data.title}</h3>
-      <button class="btn primary" onclick="window.location.href='lecture.html?id=${doc.id}'">Lire</button>
-    `;
+        div.innerHTML = `
+          <div>
+            <div class="report-title">${data.title || "Sans titre"}</div>
+            <div class="small">Par ${data.createdBy || "Inconnu"}</div>
+          </div>
+          <button class="btn primary" onclick="window.location.href='lecture.html?id=${docSnap.id}'">Lire</button>
+        `;
 
-    list.appendChild(div);
-  });
-}
+        reportsList.appendChild(div);
+      });
+    }
 
-loadReports();
-</script>
-
+    loadReports();
+  </script>
 </body>
 </html>
