@@ -2,31 +2,131 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Logs - Rapports AIT</title>
+  <title>Admin - Rapports AIT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-container">
     <header class="app-header">
-      <h1>Panel Admin — Logs de lecture</h1>
-      <p>Rapports AIT — SCP RP</p>
+      <h1>Panel Admin — Rapports AIT</h1>
+      <p class="small">Création de rapports (style Word)</p>
     </header>
 
     <main class="app-main">
       <section class="glass-card">
-        <h2>Dernières lectures</h2>
-        <p style="font-size:0.9rem;color:#9ca3af;margin-top:4px;">
-          Affiche qui a lu quel rapport, et quand.
+        <h2>Nouveau rapport</h2>
+
+        <div class="editor-toolbar">
+          <button data-cmd="bold"><b>B</b></button>
+          <button data-cmd="italic"><i>I</i></button>
+          <button data-cmd="underline"><u>U</u></button>
+          <button data-cmd="insertUnorderedList">• Liste</button>
+          <button data-cmd="insertOrderedList">1. Liste</button>
+          <button id="addImageButton">Image</button>
+        </div>
+
+        <div id="editor" class="editor-area" contenteditable="true"></div>
+
+        <div style="margin-top:12px; text-align:right;">
+          <button class="btn secondary" id="clearButton">Vider</button>
+          <button class="btn primary" id="finishButton">Terminer</button>
+        </div>
+      </section>
+
+      <section class="glass-card" style="margin-top:16px;">
+        <h2>Infos</h2>
+        <p class="small">
+          Quand tu cliques sur <b>Terminer</b>, on te demande :
+          le <b>jour</b> et le <b>titre</b>, puis le rapport est enregistré dans Firebase.
         </p>
-        <div id="logsContainer" class="logs-container" style="margin-top:10px; max-height:500px; overflow-y:auto;"></div>
+        <div style="margin-top:10px;">
+          <a href="index.html" class="btn secondary">Retour à l'accueil</a>
+        </div>
       </section>
     </main>
-
-    <footer class="app-footer">
-      <a href="index.html" class="admin-link">Retour aux rapports</a>
-    </footer>
   </div>
 
-  <script type="module" src="admin.js"></script>
+  <script type="module">
+    import { firebaseConfig } from "./firebase-config.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const ADMIN_KEY = "AIT-ADMIN-2024";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const editor = document.getElementById("editor");
+    const addImageButton = document.getElementById("addImageButton");
+    const clearButton = document.getElementById("clearButton");
+    const finishButton = document.getElementById("finishButton");
+
+    document.querySelectorAll(".editor-toolbar button[data-cmd]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const cmd = btn.getAttribute("data-cmd");
+        document.execCommand(cmd, false, null);
+      });
+    });
+
+    addImageButton.addEventListener("click", () => {
+      const url = prompt("URL de l'image :");
+      if (url) {
+        document.execCommand("insertImage", false, url);
+      }
+    });
+
+    clearButton.addEventListener("click", () => {
+      if (confirm("Vider le contenu ?")) {
+        editor.innerHTML = "";
+      }
+    });
+
+    finishButton.addEventListener("click", async () => {
+      const content = editor.innerHTML.trim();
+      if (!content) {
+        alert("Le rapport est vide.");
+        return;
+      }
+
+      const day = prompt("Pour quel jour ? (format YYYY-MM-DD)");
+      if (!day) {
+        alert("Jour obligatoire.");
+        return;
+      }
+
+      const title = prompt("Titre du rapport :");
+      if (!title) {
+        alert("Titre obligatoire.");
+        return;
+      }
+
+      const createdBy = prompt("Nom de l'admin qui écrit :") || "Admin";
+      const key = prompt("Clé admin :");
+      if (key !== ADMIN_KEY) {
+        alert("Clé admin incorrecte.");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "reports"), {
+          day,
+          title,
+          content,
+          createdBy,
+          createdAt: serverTimestamp()
+        });
+        alert("Rapport enregistré.");
+        editor.innerHTML = "";
+      } catch (e) {
+        console.error(e);
+        alert("Erreur lors de l'enregistrement.");
+      }
+    });
+  </script>
 </body>
 </html>
