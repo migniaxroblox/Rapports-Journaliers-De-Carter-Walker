@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Lecture du rapport</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1 id="reportTitle">Lecture du rapport</h1>
+      <p class="small" id="reportMeta"></p>
+    </header>
+
+    <main class="app-main">
+      <section class="glass-card">
+        <div id="reportContent"></div>
+        <div style="margin-top:16px;">
+          <button class="btn secondary" id="backButton">Retour aux rapports</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Popup identification -->
+  <div id="identModal" class="modal">
+    <div class="modal-content glass-card">
+      <h2>Identification lecture</h2>
+      <p class="small">Avant de lire le rapport, indique qui lit et, si besoin, la clé admin.</p>
+
+      <label for="readerName">Qui lit le rapport ?</label>
+      <input type="text" id="readerName" placeholder="Ex : Agent Dupont">
+
+      <label for="adminKey">Clé admin (optionnelle)</label>
+      <input type="password" id="adminKey" placeholder="Laisser vide si simple lecture">
+
+      <p id="identError" class="error-message hidden">Clé admin incorrecte.</p>
+
+      <div style="margin-top:12px; text-align:right;">
+        <button class="btn secondary" id="cancelIdentButton">Quitter</button>
+        <button class="btn primary" id="confirmIdentButton">Continuer</button>
+      </div>
+    </div>
+  </div>
+  <div id="overlay" class="overlay"></div>
+
+  <script type="module">
+    import { firebaseConfig } from "./firebase-config.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const ADMIN_KEY = "AIT-ADMIN-2024";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    const reportTitleEl = document.getElementById("reportTitle");
+    const reportMetaEl = document.getElementById("reportMeta");
+    const reportContentEl = document.getElementById("reportContent");
+    const backButton = document.getElementById("backButton");
+
+    const identModal = document.getElementById("identModal");
+    const overlay = document.getElementById("overlay");
+    const readerNameInput = document.getElementById("readerName");
+    const adminKeyInput = document.getElementById("adminKey");
+    const identError = document.getElementById("identError");
+    const cancelIdentButton = document.getElementById("cancelIdentButton");
+    const confirmIdentButton = document.getElementById("confirmIdentButton");
+
+    let currentReader = null;
+    let isAdmin = false;
+    let currentReport = null;
+
+    backButton.addEventListener("click", () => {
+      window.history.back();
+    });
+
+    cancelIdentButton.addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    confirmIdentButton.addEventListener("click", () => {
+      const reader = readerNameInput.value.trim();
+      const key = adminKeyInput.value.trim();
+
+      if (!reader) {
+        identError.textContent = "Merci d'indiquer qui lit le rapport.";
+        identError.classList.remove("hidden");
+        return;
+      }
+
+      currentReader = reader;
+      isAdmin = false;
+
+      if (key) {
+        if (key === ADMIN_KEY) {
+          isAdmin = true;
+          identError.classList.add("hidden");
+        } else {
+          identError.textContent = "Clé admin incorrecte.";
+          identError.classList.remove("hidden");
+          return;
+        }
+      }
+
+      identModal.classList.add("hidden");
+      overlay.classList.add("hidden");
+      if (currentReport) renderReport();
+      logView();
+    });
+
+    async function loadReport() {
+      if (!id) {
+        reportTitleEl.textContent = "Rapport introuvable";
+        reportContentEl.textContent = "Aucun identifiant de rapport fourni.";
+        return;
+      }
+
+      const ref = doc(db, "reports", id);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        reportTitleEl.textContent = "Rapport introuvable";
+        reportContentEl.textContent = "Ce rapport n'existe pas.";
+        return;
+      }
+
+      currentReport = snap.data();
+
+      if (!identModal.classList.contains("hidden")) {
+        // On attend l'identification
+        return;
+      }
+
+      renderReport();
+      logView();
+    }
+
+    function renderReport() {
+      reportTitleEl.textContent = currentReport.title || "Sans titre";
+      reportMetaEl.textContent = `Jour : ${currentReport.day} — Par ${currentReport.createdBy || "Inconnu"}`;
+      reportContentEl.innerHTML = currentReport.content || "";
+    }
+
+    async function logView() {
+      try {
+        await addDoc(collection(db, "logs"), {
+          reportId: id,
+          day: currentReport?.day || null,
+          reader: currentReader || "Inconnu",
+          isAdmin,
+          ts: serverTimestamp()
+        });
+      } catch (e) {
+        console.error("Erreur log view:", e);
+      }
+    }
+
+    loadReport();
+  </script>
+</body>
+</html>
