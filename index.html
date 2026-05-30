@@ -9,29 +9,21 @@
   <div class="app-container">
     <div class="glass-card" style="max-width:500px;margin:60px auto;">
       <h1>Rapports AIT</h1>
-      <p class="small" style="margin-top:4px;">Serveur SCP RP — GitHub + Firebase</p>
+      <p class="small">Serveur SCP RP — GitHub + Firebase</p>
 
-      <div style="margin-top:16px;">
-        <label for="dayInput">Jour :</label>
-        <input type="date" id="dayInput">
-      </div>
+      <label>Jour :</label>
+      <input type="date" id="dayInput">
 
-      <button class="btn primary" id="goButton" style="margin-top:10px;">Voir les rapports</button>
+      <button class="btn primary" id="goButton">Voir les rapports</button>
     </div>
   </div>
 
   <script>
-    const goButton = document.getElementById("goButton");
-    const dayInput = document.getElementById("dayInput");
-
-    goButton.addEventListener("click", () => {
-      const day = dayInput.value;
-      if (!day) {
-        alert("Choisis un jour.");
-        return;
-      }
-      window.location.href = "rapports.html?day=" + encodeURIComponent(day);
-    });
+    document.getElementById("goButton").onclick = () => {
+      const d = document.getElementById("dayInput").value;
+      if (!d) return alert("Choisis un jour");
+      location.href = "rapports.html?day=" + d;
+    };
   </script>
 </body>
 </html>
