@@ -11,6 +11,7 @@
       <h1 id="title"></h1>
       <p id="meta"></p>
       <div id="content"></div>
+
       <button class="btn secondary" onclick="history.back()">Retour</button>
     </div>
   </div>
@@ -18,13 +19,14 @@
   <div id="identModal" class="modal">
     <div class="glass-card">
       <h2>Identification</h2>
+
       <label>Qui lit ?</label>
       <input id="reader">
 
       <label>Clé admin (optionnel)</label>
       <input id="adminkey" type="password">
 
-      <p id="err" class="small" style="color:red;"></p>
+      <p id="err" style="color:red;"></p>
 
       <button class="btn secondary" onclick="location.href='index.html'">Quitter</button>
       <button class="btn primary" id="ok">Continuer</button>
