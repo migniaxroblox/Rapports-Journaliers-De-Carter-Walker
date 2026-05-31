@@ -12,6 +12,8 @@
 
       <div class="editor-area" id="editor" contenteditable="true"></div>
 
+      <input type="file" id="imgInput" accept="image/*" style="margin-top:15px;">
+
       <button class="btn secondary" id="clear">Vider</button>
       <button class="btn primary" id="save">Terminer</button>
     </div>
@@ -23,18 +25,36 @@
     import {
       getFirestore, collection, addDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getStorage, ref, uploadBytes, getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const ADMIN_KEY = "AIT-ADMIN-2024";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const editor = document.getElementById("editor");
+    const imgInput = document.getElementById("imgInput");
+
+    imgInput.onchange = () => {
+      const file = imgInput.files[0];
+      if (!file) return;
+
+      const localURL = URL.createObjectURL(file);
+
+      editor.innerHTML += `
+        <img src="${localURL}" style="max-width:100%;display:block;margin:auto;border-radius:10px;margin-top:10px;margin-bottom:10px;">
+      `;
+    };
 
     document.getElementById("clear").onclick = () => {
-      if (confirm("Vider ?")) document.getElementById("editor").innerHTML = "";
+      if (confirm("Vider ?")) editor.innerHTML = "";
     };
 
     document.getElementById("save").onclick = async () => {
-      const content = document.getElementById("editor").innerHTML.trim();
+      const content = editor.innerHTML.trim();
       if (!content) return alert("Vide");
 
       const day = prompt("Jour (YYYY-MM-DD)");
@@ -48,17 +68,30 @@
       const key = prompt("Clé admin");
       if (key !== ADMIN_KEY) return alert("Clé incorrecte");
 
+      let finalContent = content;
+
+      if (imgInput.files.length > 0) {
+        const file = imgInput.files[0];
+        const storageRef = ref(storage, "rapports-images/" + file.name);
+
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+
+        finalContent = finalContent.replace(/src="blob:[^"]+"/, `src="${url}"`);
+      }
+
       await addDoc(collection(db, "reports"), {
         day,
         title,
-        content,
+        content: finalContent,
         createdBy,
         adminKey: ADMIN_KEY,
         createdAt: serverTimestamp()
       });
 
       alert("Enregistré");
-      document.getElementById("editor").innerHTML = "";
+      editor.innerHTML = "";
+      imgInput.value = "";
     };
   </script>
 </body>
